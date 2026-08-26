@@ -18,11 +18,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class User extends BaseEntity {
-
     private String name;
-
     private String email;
-
     private String password;
+    private Boolean emailVerified;
 
 }

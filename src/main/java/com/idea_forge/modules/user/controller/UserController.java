@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.idea_forge.modules.user.dto.UserRequestDTO;
-import com.idea_forge.modules.user.dto.UserResponseDTO;
+import com.idea_forge.modules.user.dto.CreateUserRequestDTO;
+import com.idea_forge.modules.user.dto.CreateUserResponseDTO;
 import com.idea_forge.modules.user.service.JwtService;
 import com.idea_forge.modules.user.service.UserService;
 
@@ -25,9 +25,9 @@ public class UserController {
         }
 
         @PostMapping
-        public UserResponseDTO createUser(
-                        @Valid @RequestBody UserRequestDTO userRequestDTO) {
-                return userService.createUser(userRequestDTO);
+        public CreateUserResponseDTO createUser(
+                        @Valid @RequestBody CreateUserRequestDTO createUserRequestDTO) {
+                return userService.createUser(createUserRequestDTO);
         }
 
         // @PostMapping("/login")
