@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: idea-forge-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: idea_forge
+    ports:
+      - "5432:5432"
