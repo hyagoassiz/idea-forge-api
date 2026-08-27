@@ -29,13 +29,15 @@ public class UserService {
     }
 
     public CreateUserResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO) {
+
         if (userRepository.findByEmail(createUserRequestDTO.getEmail()).isPresent()) {
             throw new EmailAlreadyExistsException("Email já cadastrado");
         }
 
         User user = userMapper.toEntity(createUserRequestDTO);
-        user.setName(user.getName().trim().replaceAll("\\s+", " "));
+
         user.setPassword(passwordEncoder.encode(createUserRequestDTO.getPassword()));
+
         user.setEmailVerified(false);
 
         User savedUser = userRepository.save(user);
