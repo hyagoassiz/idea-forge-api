@@ -21,7 +21,9 @@ public class UserService {
 
     private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, JwtService jwtService, UserMapper userMapper) {
+    public UserService(UserRepository userRepository,
+            // JwtService jwtService,
+            UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
         // this.jwtService = jwtService;

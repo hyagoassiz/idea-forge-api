@@ -15,9 +15,10 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "password", ignore = true)
-    User toEntity(CreateUserRequestDTO dto);
+    @Mapping(target = "emailVerified", ignore = true)
+    User toEntity(CreateUserRequestDTO createUserRequestDTO);
 
-    CreateUserResponseDTO toCreateResponse(User entity);
+    CreateUserResponseDTO toCreateResponse(User user);
 
-    UserResponseDTO toUserResponse(User entity);
+    UserResponseDTO toUserResponse(User user);
 }
