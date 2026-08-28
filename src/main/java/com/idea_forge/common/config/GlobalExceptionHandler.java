@@ -14,8 +14,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.idea_forge.common.config.dto.ApiErrorResponse;
 import com.idea_forge.common.config.dto.ApiFieldError;
 import com.idea_forge.common.exception.EmailAlreadyExistsException;
+import com.idea_forge.common.exception.EmailAlreadyVerifiedException;
+import com.idea_forge.common.exception.ExpiredVerificationTokenException;
 import com.idea_forge.common.exception.FieldValidationException;
 import com.idea_forge.common.exception.InvalidCredentialsException;
+import com.idea_forge.common.exception.InvalidVerificationTokenException;
+import com.idea_forge.common.exception.VerificationTokenAlreadyUsedException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -71,6 +75,63 @@ public class GlobalExceptionHandler {
         ApiErrorResponse response = new ApiErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "ILLEGAL_ARGUMENT",
+                ex.getMessage(),
+                errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidVerificationToken(InvalidVerificationTokenException ex) {
+        List<ApiFieldError> errors = new ArrayList<>();
+        errors.add(new ApiFieldError("token", "INVALID_VERIFICATION_TOKEN", ex.getMessage()));
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_VERIFICATION_TOKEN",
+                ex.getMessage(),
+                errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(EmailAlreadyVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleEmailAlreadyVerified(EmailAlreadyVerifiedException ex) {
+        List<ApiFieldError> errors = new ArrayList<>();
+        errors.add(new ApiFieldError("email", "EMAIL_ALREADY_VERIFIED", ex.getMessage()));
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "EMAIL_ALREADY_VERIFIED",
+                ex.getMessage(),
+                errors);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(VerificationTokenAlreadyUsedException.class)
+    public ResponseEntity<ApiErrorResponse> handleVerificationTokenAlreadyUsed(
+            VerificationTokenAlreadyUsedException ex) {
+        List<ApiFieldError> errors = new ArrayList<>();
+        errors.add(new ApiFieldError("token", "VERIFICATION_TOKEN_ALREADY_USED", ex.getMessage()));
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "VERIFICATION_TOKEN_ALREADY_USED",
+                ex.getMessage(),
+                errors);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(ExpiredVerificationTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpiredVerificationToken(ExpiredVerificationTokenException ex) {
+        List<ApiFieldError> errors = new ArrayList<>();
+        errors.add(new ApiFieldError("token", "VERIFICATION_TOKEN_EXPIRED", ex.getMessage()));
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "VERIFICATION_TOKEN_EXPIRED",
                 ex.getMessage(),
                 errors);
 
