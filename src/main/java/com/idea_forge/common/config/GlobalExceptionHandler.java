@@ -15,10 +15,12 @@ import com.idea_forge.common.config.dto.ApiErrorResponse;
 import com.idea_forge.common.config.dto.ApiFieldError;
 import com.idea_forge.common.exception.EmailAlreadyExistsException;
 import com.idea_forge.common.exception.EmailAlreadyVerifiedException;
+import com.idea_forge.common.exception.EmailVerificationSendFailedException;
 import com.idea_forge.common.exception.ExpiredVerificationTokenException;
 import com.idea_forge.common.exception.FieldValidationException;
 import com.idea_forge.common.exception.InvalidCredentialsException;
 import com.idea_forge.common.exception.InvalidVerificationTokenException;
+import com.idea_forge.common.exception.TooManyVerificationRequestsException;
 import com.idea_forge.common.exception.VerificationTokenAlreadyUsedException;
 
 @ControllerAdvice
@@ -132,6 +134,35 @@ public class GlobalExceptionHandler {
         ApiErrorResponse response = new ApiErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "VERIFICATION_TOKEN_EXPIRED",
+                ex.getMessage(),
+                errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(TooManyVerificationRequestsException.class)
+    public ResponseEntity<ApiErrorResponse> handleTooManyVerificationRequests(
+            TooManyVerificationRequestsException ex) {
+        List<ApiFieldError> errors = new ArrayList<>();
+        errors.add(new ApiFieldError("email", "TOO_MANY_VERIFICATION_REQUESTS", ex.getMessage()));
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.TOO_MANY_REQUESTS.value(),
+                "TOO_MANY_VERIFICATION_REQUESTS",
+                ex.getMessage(),
+                errors);
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+    }
+
+    @ExceptionHandler(EmailVerificationSendFailedException.class)
+    public ResponseEntity<ApiErrorResponse> handleEmailVerificationSendFailed(EmailVerificationSendFailedException ex) {
+        List<ApiFieldError> errors = new ArrayList<>();
+        errors.add(new ApiFieldError("email", "EMAIL_VERIFICATION_SEND_FAILED", ex.getMessage()));
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "EMAIL_VERIFICATION_SEND_FAILED",
                 ex.getMessage(),
                 errors);
 

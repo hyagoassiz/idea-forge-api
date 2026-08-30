@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.idea_forge.modules.user.dto.EmailVerificationResponseDTO;
+import com.idea_forge.modules.user.dto.ResendVerificationEmailRequestDTO;
 import com.idea_forge.modules.user.dto.VerifyEmailRequestDTO;
 import com.idea_forge.modules.user.service.EmailVerificationService;
 
@@ -26,6 +27,14 @@ public class EmailVerificationController {
     public ResponseEntity<EmailVerificationResponseDTO> verifyEmail(
             @Valid @RequestBody VerifyEmailRequestDTO verifyEmailRequestDTO) {
         EmailVerificationResponseDTO response = emailVerificationService.verifyEmail(verifyEmailRequestDTO);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/resend-verification-email")
+    public ResponseEntity<EmailVerificationResponseDTO> resendVerificationEmail(
+            @Valid @RequestBody ResendVerificationEmailRequestDTO resendVerificationEmailRequestDTO) {
+        EmailVerificationResponseDTO response = emailVerificationService
+                .resendVerificationEmail(resendVerificationEmailRequestDTO.getEmail());
         return ResponseEntity.ok(response);
     }
 }
