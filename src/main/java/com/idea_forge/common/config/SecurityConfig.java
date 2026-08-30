@@ -35,7 +35,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users", "/users/login", "/users/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users", "/users/login", "/users/refresh",
+                                "/auth/verify-email", "/auth/resend-verification-email")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults());
