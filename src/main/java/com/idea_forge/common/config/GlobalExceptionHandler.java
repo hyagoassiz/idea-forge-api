@@ -15,6 +15,7 @@ import com.idea_forge.common.config.dto.ApiErrorResponse;
 import com.idea_forge.common.config.dto.ApiFieldError;
 import com.idea_forge.common.exception.EmailAlreadyExistsException;
 import com.idea_forge.common.exception.EmailAlreadyVerifiedException;
+import com.idea_forge.common.exception.EmailNotVerifiedException;
 import com.idea_forge.common.exception.EmailVerificationSendFailedException;
 import com.idea_forge.common.exception.ExpiredVerificationTokenException;
 import com.idea_forge.common.exception.FieldValidationException;
@@ -67,6 +68,20 @@ public class GlobalExceptionHandler {
                 errors);
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleEmailNotVerified(EmailNotVerifiedException ex) {
+        List<ApiFieldError> errors = new ArrayList<>();
+        errors.add(new ApiFieldError("email", "EMAIL_NOT_VERIFIED", ex.getMessage()));
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "EMAIL_NOT_VERIFIED",
+                ex.getMessage(),
+                errors);
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     @ExceptionHandler(FieldValidationException.class)
