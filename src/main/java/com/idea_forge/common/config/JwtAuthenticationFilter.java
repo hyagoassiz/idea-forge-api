@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
+    private static final String ACCESS_TOKEN_COOKIE_NAME = "access_token";
 
     private final JwtService jwtService;
 
