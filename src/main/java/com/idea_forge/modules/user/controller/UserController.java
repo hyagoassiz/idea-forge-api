@@ -13,8 +13,10 @@ import com.idea_forge.modules.user.dto.LoginRequestDTO;
 import com.idea_forge.modules.user.dto.LoginResponseDTO;
 import com.idea_forge.modules.user.dto.TokenResponseDTO;
 import com.idea_forge.modules.user.service.JwtService;
+import com.idea_forge.modules.user.service.LogoutService;
 import com.idea_forge.modules.user.service.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -25,9 +27,12 @@ public class UserController {
 
         private final JwtService jwtService;
 
-        public UserController(UserService userService, JwtService jwtService) {
+        private final LogoutService logoutService;
+
+        public UserController(UserService userService, JwtService jwtService, LogoutService logoutService) {
                 this.userService = userService;
                 this.jwtService = jwtService;
+                this.logoutService = logoutService;
         }
 
         @PostMapping
@@ -53,6 +58,12 @@ public class UserController {
                                                 HttpHeaders.SET_COOKIE,
                                                 jwtService.generateRefreshTokenCookie(tokens.getRefreshToken()))
                                 .body(response);
+        }
+
+        @PostMapping("/logout")
+        public ResponseEntity<Void> logout(HttpServletResponse response) {
+                logoutService.logout(response);
+                return ResponseEntity.noContent().build();
         }
 
         // @GetMapping("/me")
