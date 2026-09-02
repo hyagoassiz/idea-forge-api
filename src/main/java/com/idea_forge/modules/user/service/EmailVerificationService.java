@@ -88,7 +88,9 @@ public class EmailVerificationService {
             throw new EmailVerificationSendFailedException("Não foi possível enviar o e-mail de validação.");
         }
 
-        return new EmailVerificationResponseDTO("novo e-mail de validação enviado com sucesso.");
+        // TODO: Remove this temporary token exposure once the email verification flow
+        // is final.
+        return new EmailVerificationResponseDTO("novo e-mail de validação enviado com sucesso.", newToken.getToken());
     }
 
     @Transactional
