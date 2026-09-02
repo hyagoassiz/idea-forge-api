@@ -1,5 +1,7 @@
 package com.idea_forge.modules.user.service;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +12,7 @@ import com.idea_forge.modules.user.dto.CreateUserRequestDTO;
 import com.idea_forge.modules.user.dto.CreateUserResponseDTO;
 import com.idea_forge.modules.user.dto.LoginRequestDTO;
 import com.idea_forge.modules.user.dto.TokenResponseDTO;
+import com.idea_forge.modules.user.dto.UserResponseDTO;
 import com.idea_forge.modules.user.entity.EmailVerificationToken;
 import com.idea_forge.modules.user.entity.User;
 import com.idea_forge.modules.user.mapper.UserMapper;
@@ -78,40 +81,39 @@ public class UserService {
         return new TokenResponseDTO(accessToken, refreshToken);
     }
 
-    // public UserResponseDTO getAuthenticatedUser() {
-    // Authentication authentication =
-    // SecurityContextHolder.getContext().getAuthentication();
+    public UserResponseDTO getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    // if (authentication == null || !authentication.isAuthenticated()
-    // || authentication.getPrincipal() == null
-    // || "anonymousUser".equals(authentication.getPrincipal())) {
-    // throw new InvalidCredentialsException("Credenciais inválidas");
-    // }
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication.getPrincipal() == null
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new InvalidCredentialsException("Credenciais inválidas");
+        }
 
-    // String email = authentication.getName();
-    // User user = userRepository.findByEmail(email)
-    // .orElseThrow(() -> new InvalidCredentialsException("Credenciais inválidas"));
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidCredentialsException("Credenciais inválidas"));
 
-    // return userMapper.toUserResponse(user);
-    // }
+        return userMapper.toUserResponse(user);
+    }
 
-    // public TokenResponseDTO refresh(String refreshToken) {
-    // if (!jwtService.isTokenValid(refreshToken)) {
-    // throw new RuntimeException("Refresh token inválido");
-    // }
+    public TokenResponseDTO refresh(String refreshToken) {
+        if (!jwtService.isTokenValid(refreshToken)) {
+            throw new RuntimeException("Refresh token inválido");
+        }
 
-    // if (!jwtService.extractTokenType(refreshToken).equals("refresh")) {
-    // throw new RuntimeException("Token não é um refresh token");
-    // }
+        if (!jwtService.extractTokenType(refreshToken).equals("refresh")) {
+            throw new RuntimeException("Token não é um refresh token");
+        }
 
-    // String email = jwtService.extractEmail(refreshToken);
+        String email = jwtService.extractEmail(refreshToken);
 
-    // User user = userRepository.findByEmail(email)
-    // .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-    // String newAccessToken = jwtService.generateAccessToken(user);
-    // String newRefreshToken = jwtService.generateRefreshToken(user);
+        String newAccessToken = jwtService.generateAccessToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
 
-    // return new TokenResponseDTO(newAccessToken, newRefreshToken);
-    // }
+        return new TokenResponseDTO(newAccessToken, newRefreshToken);
+    }
 }

@@ -8,7 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @Service
 public class LogoutService {
 
-    private static final String ACCESS_TOKEN_COOKIE_NAME = "access_token";
+    private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
+
+    private static final String LEGACY_ACCESS_TOKEN_COOKIE_NAME = "access_token";
+
     private static final String COOKIE_PATH = "/";
 
     /**
@@ -17,7 +20,12 @@ public class LogoutService {
      * @param response HTTP response to add the expired cookie
      */
     public void logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie(ACCESS_TOKEN_COOKIE_NAME, "");
+        addExpiredCookie(response, ACCESS_TOKEN_COOKIE_NAME);
+        addExpiredCookie(response, LEGACY_ACCESS_TOKEN_COOKIE_NAME);
+    }
+
+    private void addExpiredCookie(HttpServletResponse response, String cookieName) {
+        Cookie cookie = new Cookie(cookieName, "");
         cookie.setHttpOnly(true);
         cookie.setPath(COOKIE_PATH);
         cookie.setMaxAge(0);
