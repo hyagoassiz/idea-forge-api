@@ -17,7 +17,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String ACCESS_TOKEN_COOKIE_NAME = "access_token";
+    private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
+    private static final String LEGACY_ACCESS_TOKEN_COOKIE_NAME = "access_token";
 
     private final JwtService jwtService;
 
@@ -35,7 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+                String cookieName = cookie.getName();
+                if (ACCESS_TOKEN_COOKIE_NAME.equals(cookieName) || LEGACY_ACCESS_TOKEN_COOKIE_NAME.equals(cookieName)) {
                     String token = cookie.getValue();
                     if (jwtService.isTokenValid(token)) {
                         String email = jwtService.extractEmail(token);
