@@ -76,8 +76,8 @@ public class EmailVerificationService {
                         "Aguarde 5 minutos antes de solicitar um novo e-mail de validação.");
             }
 
-            // remove previous token
             emailVerificationTokenRepository.delete(existing);
+            emailVerificationTokenRepository.flush();
         }
 
         EmailVerificationToken newToken = createVerificationToken(user);
