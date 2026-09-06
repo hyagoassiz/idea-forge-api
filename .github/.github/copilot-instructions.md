@@ -17,6 +17,9 @@ Não antecipe funcionalidades futuras.
 
 Não crie classes, DTOs, services, repositories ou abstrações sem necessidade real.
 
+- Não crie arquivos de teste (unitários, integração ou e2e), a menos que isso seja solicitado explicitamente.
+- Nunca adicione classes de teste automaticamente.
+
 Não altere código não relacionado à solicitação.
 
 Se houver dúvida sobre uma regra de negócio, peça esclarecimentos antes de implementar.

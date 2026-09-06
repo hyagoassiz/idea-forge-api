@@ -4,14 +4,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.idea_forge.common.exception.EmailAlreadyExistsException;
 import com.idea_forge.common.exception.InvalidCredentialsException;
+import com.idea_forge.modules.user.dto.CreateUserRequestDTO;
+import com.idea_forge.modules.user.dto.CreateUserResponseDTO;
 import com.idea_forge.modules.user.dto.LoginRequestDTO;
 import com.idea_forge.modules.user.dto.TokenResponseDTO;
-import com.idea_forge.modules.user.dto.UserRequestDTO;
 import com.idea_forge.modules.user.dto.UserResponseDTO;
+import com.idea_forge.modules.user.entity.EmailVerificationToken;
 import com.idea_forge.modules.user.entity.User;
+import com.idea_forge.modules.user.mapper.UserMapper;
 import com.idea_forge.modules.user.repository.UserRepository;
 
 @Service
@@ -23,34 +27,56 @@ public class UserService {
 
     private final JwtService jwtService;
 
-    public UserService(UserRepository userRepository, JwtService jwtService) {
+    private final UserMapper userMapper;
+
+    private final EmailVerificationService emailVerificationService;
+
+    public UserService(UserRepository userRepository,
+            JwtService jwtService,
+            UserMapper userMapper,
+            EmailVerificationService emailVerificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.jwtService = jwtService;
+        this.userMapper = userMapper;
+        this.emailVerificationService = emailVerificationService;
     }
 
-    public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
-        if (userRepository.findByEmail(userRequestDTO.getEmail()).isPresent()) {
+    @Transactional
+    public CreateUserResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO) {
+
+        if (userRepository.findByEmail(createUserRequestDTO.getEmail()).isPresent()) {
             throw new EmailAlreadyExistsException("Email já cadastrado");
         }
 
-        User user = User.builder()
-                .name(userRequestDTO.getName().trim().replaceAll("\\s+", " "))
-                .email(userRequestDTO.getEmail())
-                .password(passwordEncoder.encode(userRequestDTO.getPassword()))
-                .build();
+        User user = userMapper.toEntity(createUserRequestDTO);
+        user.setPassword(passwordEncoder.encode(createUserRequestDTO.getPassword()));
+        user.setEmailVerified(false);
 
         User savedUser = userRepository.save(user);
 
-        return new UserResponseDTO(savedUser.getName(), savedUser.getEmail());
+        EmailVerificationToken emailVerificationToken = emailVerificationService.createVerificationToken(savedUser);
+        emailVerificationService.sendVerificationEmail(savedUser, emailVerificationToken.getToken());
+
+        // TODO: Remove this temporary token exposure once the email verification flow
+        // is final.
+        CreateUserResponseDTO response = userMapper.toCreateResponse(savedUser);
+        response.setToken(emailVerificationToken.getToken());
+        return response;
     }
 
     public TokenResponseDTO login(LoginRequestDTO loginRequestDTO) {
         User user = userRepository.findByEmail(loginRequestDTO.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("Credenciais inválidas"));
 
-        if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginRequestDTO.getPassword(),
+                user.getPassword())) {
             throw new InvalidCredentialsException("Credenciais inválidas");
+        }
+
+        if (Boolean.FALSE.equals(user.getEmailVerified())) {
+            throw new com.idea_forge.common.exception.EmailNotVerifiedException(
+                    "E-mail ainda não foi validado. Verifique sua caixa de entrada ou solicite um novo e-mail de validação.");
         }
 
         String accessToken = jwtService.generateAccessToken(user);
@@ -72,7 +98,7 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new InvalidCredentialsException("Credenciais inválidas"));
 
-        return new UserResponseDTO(user.getName(), user.getEmail());
+        return userMapper.toUserResponse(user);
     }
 
     public TokenResponseDTO refresh(String refreshToken) {
