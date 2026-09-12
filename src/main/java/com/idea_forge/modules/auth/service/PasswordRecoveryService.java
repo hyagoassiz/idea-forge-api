@@ -1,4 +1,4 @@
-package com.idea_forge.modules.user.service;
+package com.idea_forge.modules.auth.service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -9,13 +9,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.idea_forge.common.exception.InvalidPasswordResetTokenException;
-import com.idea_forge.modules.user.dto.ForgotPasswordResponseDTO;
-import com.idea_forge.modules.user.dto.MessageResponseDTO;
-import com.idea_forge.modules.user.dto.ResetPasswordRequestDTO;
-import com.idea_forge.modules.user.dto.ValidateResetTokenResponseDTO;
-import com.idea_forge.modules.user.entity.PasswordResetToken;
+import com.idea_forge.modules.auth.dto.ForgotPasswordResponseDTO;
+import com.idea_forge.modules.auth.dto.ResetPasswordRequestDTO;
+import com.idea_forge.modules.auth.dto.ResetPasswordResponseDTO;
+import com.idea_forge.modules.auth.dto.ValidateResetTokenResponseDTO;
+import com.idea_forge.modules.auth.entity.PasswordResetToken;
+import com.idea_forge.modules.auth.repository.PasswordResetTokenRepository;
 import com.idea_forge.modules.user.entity.User;
-import com.idea_forge.modules.user.repository.PasswordResetTokenRepository;
 import com.idea_forge.modules.user.repository.UserRepository;
 
 @Service
@@ -71,7 +71,7 @@ public class PasswordRecoveryService {
     }
 
     @Transactional
-    public MessageResponseDTO resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO) {
+    public ResetPasswordResponseDTO resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO) {
         PasswordResetToken resetToken = findValidToken(resetPasswordRequestDTO.getToken())
                 .orElseThrow(() -> new InvalidPasswordResetTokenException(INVALID_TOKEN_MESSAGE));
 
@@ -83,7 +83,7 @@ public class PasswordRecoveryService {
         resetToken.setUsedAt(now);
         passwordResetTokenRepository.save(resetToken);
 
-        return new MessageResponseDTO(PASSWORD_CHANGED_MESSAGE);
+        return new ResetPasswordResponseDTO(PASSWORD_CHANGED_MESSAGE);
     }
 
     private void invalidateActiveTokens(User user, LocalDateTime now) {

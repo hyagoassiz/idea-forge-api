@@ -1,4 +1,4 @@
-package com.idea_forge.modules.user.dto;
+package com.idea_forge.modules.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

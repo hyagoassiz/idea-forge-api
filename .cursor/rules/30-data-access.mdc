@@ -1,0 +1,26 @@
+---
+description: Persistência e acesso a dados
+globs:
+  - "src/main/java/**/*.java"
+---
+
+# Persistência
+
+- Utilize Spring Data JPA para acesso aos dados.
+- Repositories devem ser responsáveis apenas pelo acesso aos dados.
+- Não coloque regras de negócio em repositories.
+- Não coloque regras de negócio em entities.
+
+# Entities
+
+- Entities representam dados persistidos.
+- Utilize relacionamentos JPA somente quando necessários.
+- Evite relacionamentos desnecessários.
+- Evite carregar relacionamentos de forma `EAGER` sem necessidade.
+- Prefira `LAZY` quando o relacionamento não precisar ser carregado automaticamente.
+
+# Banco de dados
+
+- Não altere a estrutura do banco fora do escopo da tarefa.
+- Não crie campos, tabelas ou relacionamentos antecipando funcionalidades futuras.
+- Reutilize entidades e relacionamentos existentes quando atenderem ao requisito.
