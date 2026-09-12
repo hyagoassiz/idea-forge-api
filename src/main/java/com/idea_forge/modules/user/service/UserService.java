@@ -8,12 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.idea_forge.common.exception.EmailAlreadyExistsException;
 import com.idea_forge.common.exception.InvalidCredentialsException;
+import com.idea_forge.modules.auth.entity.EmailVerificationToken;
+import com.idea_forge.modules.auth.service.EmailVerificationService;
 import com.idea_forge.modules.user.dto.CreateUserRequestDTO;
 import com.idea_forge.modules.user.dto.CreateUserResponseDTO;
-import com.idea_forge.modules.user.dto.LoginRequestDTO;
-import com.idea_forge.modules.user.dto.TokenResponseDTO;
 import com.idea_forge.modules.user.dto.UserResponseDTO;
-import com.idea_forge.modules.user.entity.EmailVerificationToken;
 import com.idea_forge.modules.user.entity.User;
 import com.idea_forge.modules.user.mapper.UserMapper;
 import com.idea_forge.modules.user.repository.UserRepository;
@@ -25,19 +24,15 @@ public class UserService {
 
     private final BCryptPasswordEncoder passwordEncoder;
 
-    private final JwtService jwtService;
-
     private final UserMapper userMapper;
 
     private final EmailVerificationService emailVerificationService;
 
     public UserService(UserRepository userRepository,
-            JwtService jwtService,
             UserMapper userMapper,
             EmailVerificationService emailVerificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
-        this.jwtService = jwtService;
         this.userMapper = userMapper;
         this.emailVerificationService = emailVerificationService;
     }
@@ -65,26 +60,6 @@ public class UserService {
         return response;
     }
 
-    public TokenResponseDTO login(LoginRequestDTO loginRequestDTO) {
-        User user = userRepository.findByEmail(loginRequestDTO.getEmail())
-                .orElseThrow(() -> new InvalidCredentialsException("Credenciais inválidas"));
-
-        if (!passwordEncoder.matches(loginRequestDTO.getPassword(),
-                user.getPassword())) {
-            throw new InvalidCredentialsException("Credenciais inválidas");
-        }
-
-        if (Boolean.FALSE.equals(user.getEmailVerified())) {
-            throw new com.idea_forge.common.exception.EmailNotVerifiedException(
-                    "E-mail ainda não foi validado. Verifique sua caixa de entrada ou solicite um novo e-mail de validação.");
-        }
-
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-
-        return new TokenResponseDTO(accessToken, refreshToken);
-    }
-
     public UserResponseDTO getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -101,23 +76,4 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public TokenResponseDTO refresh(String refreshToken) {
-        if (!jwtService.isTokenValid(refreshToken)) {
-            throw new RuntimeException("Refresh token inválido");
-        }
-
-        if (!jwtService.extractTokenType(refreshToken).equals("refresh")) {
-            throw new RuntimeException("Token não é um refresh token");
-        }
-
-        String email = jwtService.extractEmail(refreshToken);
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        String newAccessToken = jwtService.generateAccessToken(user);
-        String newRefreshToken = jwtService.generateRefreshToken(user);
-
-        return new TokenResponseDTO(newAccessToken, newRefreshToken);
-    }
 }

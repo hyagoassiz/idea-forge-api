@@ -1,0 +1,34 @@
+---
+description: Padrões Java e Spring Boot
+globs:
+  - "src/main/java/**/*.java"
+---
+
+# Java
+
+- Utilize Java conforme as convenções do projeto.
+- Prefira código simples e legível.
+- Utilize `final` quando contribuir para deixar a intenção clara.
+- Evite métodos excessivamente longos.
+- Evite classes com responsabilidades diferentes.
+
+# Spring Boot
+
+- Utilize as convenções do Spring Boot.
+- Utilize injeção de dependência por construtor.
+- Não utilize field injection.
+- Utilize anotações do Spring somente quando necessárias.
+- Mantenha controllers focados na camada HTTP.
+- Mantenha regras de negócio nos services.
+
+# DTOs
+
+- Utilize DTOs para contratos da API.
+- Validações de entrada devem ser declaradas nos DTOs.
+- Não coloque validações de entrada diretamente nas entities.
+- Não exponha entities diretamente como resposta da API.
+
+# Mappers
+
+- Utilize mappers para conversão entre DTOs e entities.
+- Reutilize o padrão de mapper existente antes de criar outro.

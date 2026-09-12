@@ -7,7 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.idea_forge.modules.user.service.JwtService;
+import com.idea_forge.common.service.JwtService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,21 +24,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public JwtAuthenticationFilter(JwtService jwtService) {
         this.jwtService = jwtService;
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        if (!"POST".equalsIgnoreCase(request.getMethod())) {
-            return false;
-        }
-
-        String path = request.getServletPath();
-        return "/auth/resend-verification-email".equals(path)
-                || "/auth/verify-email".equals(path)
-                || "/users".equals(path)
-                || "/users/login".equals(path)
-                || "/users/refresh".equals(path)
-                || "/users/logout".equals(path);
     }
 
     @Override
