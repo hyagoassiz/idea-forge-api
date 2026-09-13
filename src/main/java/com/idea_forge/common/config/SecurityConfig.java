@@ -12,13 +12,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import jakarta.servlet.DispatcherType;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.idea_forge.modules.user.service.JwtService;
+import com.idea_forge.common.service.JwtService;
 
 @Configuration
 @EnableWebSecurity
@@ -36,15 +34,14 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users", "/users/login", "/users/refresh",
-                                "/auth/verify-email", "/auth/resend-verification-email", "/users/logout")
+                        .requestMatchers(HttpMethod.POST, "/users", "/auth/login", "/auth/refresh",
+                                "/auth/verify-email", "/auth/resend-verification-email", "/auth/logout",
+                                "/auth/forgot-password", "/auth/reset-password")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth/reset-password/validate").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(Customizer.withDefaults());
-
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

@@ -1,4 +1,4 @@
-package com.idea_forge.modules.user.service;
+package com.idea_forge.common.service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;

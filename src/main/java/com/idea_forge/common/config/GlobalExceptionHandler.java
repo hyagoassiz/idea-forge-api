@@ -20,6 +20,7 @@ import com.idea_forge.common.exception.EmailVerificationSendFailedException;
 import com.idea_forge.common.exception.ExpiredVerificationTokenException;
 import com.idea_forge.common.exception.FieldValidationException;
 import com.idea_forge.common.exception.InvalidCredentialsException;
+import com.idea_forge.common.exception.InvalidPasswordResetTokenException;
 import com.idea_forge.common.exception.InvalidVerificationTokenException;
 import com.idea_forge.common.exception.TooManyVerificationRequestsException;
 import com.idea_forge.common.exception.VerificationTokenAlreadyUsedException;
@@ -178,6 +179,20 @@ public class GlobalExceptionHandler {
         ApiErrorResponse response = new ApiErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "EMAIL_VERIFICATION_SEND_FAILED",
+                ex.getMessage(),
+                errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordResetToken(InvalidPasswordResetTokenException ex) {
+        List<ApiFieldError> errors = new ArrayList<>();
+        errors.add(new ApiFieldError("token", "INVALID_PASSWORD_RESET_TOKEN", ex.getMessage()));
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_PASSWORD_RESET_TOKEN",
                 ex.getMessage(),
                 errors);
 

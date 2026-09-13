@@ -1,4 +1,4 @@
-package com.idea_forge.modules.user.service;
+package com.idea_forge.modules.auth.service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,11 +12,11 @@ import com.idea_forge.common.exception.ExpiredVerificationTokenException;
 import com.idea_forge.common.exception.InvalidVerificationTokenException;
 import com.idea_forge.common.exception.TooManyVerificationRequestsException;
 import com.idea_forge.common.exception.VerificationTokenAlreadyUsedException;
-import com.idea_forge.modules.user.dto.EmailVerificationResponseDTO;
-import com.idea_forge.modules.user.dto.VerifyEmailRequestDTO;
-import com.idea_forge.modules.user.entity.EmailVerificationToken;
+import com.idea_forge.modules.auth.dto.EmailVerificationResponseDTO;
+import com.idea_forge.modules.auth.dto.VerifyEmailRequestDTO;
+import com.idea_forge.modules.auth.entity.EmailVerificationToken;
+import com.idea_forge.modules.auth.repository.EmailVerificationTokenRepository;
 import com.idea_forge.modules.user.entity.User;
-import com.idea_forge.modules.user.repository.EmailVerificationTokenRepository;
 import com.idea_forge.modules.user.repository.UserRepository;
 
 @Service

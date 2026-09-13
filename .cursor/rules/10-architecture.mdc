@@ -1,0 +1,41 @@
+---
+description: Arquitetura do backend
+globs:
+  - "src/main/java/**/*.java"
+---
+
+# Estrutura
+
+- `modules`: funcionalidades organizadas por domínio.
+- `common`: código compartilhado entre domínios.
+
+Cada domínio dentro de `modules` deve organizar suas responsabilidades conforme a necessidade da funcionalidade.
+
+Exemplo:
+
+modules/
+└── user/
+    ├── controller/
+    ├── dto/
+    ├── entity/
+    ├── mapper/
+    ├── repository/
+    └── service/
+
+# Responsabilidades
+
+- Controllers recebem requisições HTTP e retornam respostas.
+- DTOs representam contratos de entrada e saída da API.
+- Services concentram regras de negócio.
+- Repositories são responsáveis pelo acesso aos dados.
+- Entities representam o modelo persistido.
+- Mappers realizam conversões entre entidades e DTOs.
+
+# Regras
+
+- Organize funcionalidades específicas do domínio dentro de `modules`.
+- Código compartilhado entre domínios deve ficar em `common`.
+- Não crie camadas ou pastas sem necessidade.
+- Não mova arquivos sem necessidade.
+- Não crie pastas vazias.
+- Evite dependências desnecessárias entre módulos.

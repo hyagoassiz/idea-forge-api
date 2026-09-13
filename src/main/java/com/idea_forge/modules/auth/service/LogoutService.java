@@ -1,4 +1,4 @@
-package com.idea_forge.modules.user.service;
+package com.idea_forge.modules.auth.service;
 
 import org.springframework.stereotype.Service;
 

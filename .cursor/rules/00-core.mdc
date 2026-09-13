@@ -1,0 +1,37 @@
+---
+description: Regras gerais obrigatórias do backend
+alwaysApply: true
+---
+
+# Princípios
+
+- Priorize simplicidade, legibilidade e consistência.
+- Implemente apenas o necessário para o requisito atual.
+- Não antecipe funcionalidades futuras.
+- Não altere código fora do escopo da tarefa.
+- Antes de criar algo novo, verifique se existe uma implementação semelhante que possa ser reutilizada ou evoluída.
+- Se existir dúvida de regra de negócio, peça esclarecimentos.
+
+# Java
+
+- Evite `any`-like patterns e tipos excessivamente genéricos quando um tipo específico for possível.
+- Prefira tipos explícitos e contratos claros.
+- Evite casts desnecessários.
+- Não duplique classes, métodos ou regras existentes.
+
+# Nomenclatura
+
+- Todo código deve utilizar inglês.
+- Utilize nomes claros e descritivos.
+- Siga as convenções de nomenclatura do Java e Spring.
+
+# Decisão
+
+Antes de criar qualquer abstração:
+
+1. Existe algo reutilizável?
+2. A implementação existente pode ser evoluída?
+3. A nova abstração é realmente necessária?
+4. Isso é necessário para o requisito atual?
+
+Escolha sempre a solução mais simples que mantenha os padrões existentes.
