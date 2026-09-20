@@ -20,15 +20,14 @@ import com.idea_forge.modules.user.entity.User;
 public class BoardService {
 
     private final BoardRepository boardRepository;
-
     private final AuthenticatedUserService authenticatedUserService;
-
     private final BoardMapper boardMapper;
 
     public BoardService(
             BoardRepository boardRepository,
             AuthenticatedUserService authenticatedUserService,
             BoardMapper boardMapper) {
+
         this.boardRepository = boardRepository;
         this.authenticatedUserService = authenticatedUserService;
         this.boardMapper = boardMapper;
@@ -36,19 +35,9 @@ public class BoardService {
 
     @Transactional
     public BoardResponseDTO createBoard(CreateBoardRequestDTO createBoardRequestDTO) {
+        User authenticatedUser = getAuthenticatedUser();
 
-        User authenticatedUser = authenticatedUserService.getCurrentUser();
-
-        boolean boardAlreadyExists = boardRepository
-                .existsByOwnerIdAndNameIgnoreCase(
-                        authenticatedUser.getId(),
-                        createBoardRequestDTO.getName());
-
-        if (boardAlreadyExists) {
-            throw new FieldValidationException(
-                    "name",
-                    "Já existe um quadro com esse nome");
-        }
+        validateBoardName(createBoardRequestDTO.getName(), authenticatedUser);
 
         Board board = boardMapper.toEntity(createBoardRequestDTO);
         board.setOwner(authenticatedUser);
@@ -60,7 +49,10 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public List<BoardResponseDTO> getAllBoards() {
-        return boardRepository.findAll(Sort.by(Sort.Direction.ASC, "name"))
+        Long userId = getAuthenticatedUser().getId();
+
+        return boardRepository
+                .findAllByOwnerId(userId, Sort.by(Sort.Direction.ASC, "name"))
                 .stream()
                 .map(boardMapper::toResponse)
                 .toList();
@@ -68,46 +60,65 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public BoardResponseDTO getBoardById(Long id) {
-        User authenticatedUser = authenticatedUserService.getCurrentUser();
-
-        Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Quadro não encontrado"));
-
-        if (!board.getOwner().getId().equals(authenticatedUser.getId())) {
-            throw new com.idea_forge.common.exception.InvalidCredentialsException(
-                    "Usuário não autorizado a visualizar esse quadro");
-        }
+        Board board = getBoardOwnedByAuthenticatedUser(id);
 
         return boardMapper.toResponse(board);
     }
 
     @Transactional
-    public BoardResponseDTO updateBoard(Long id, UpdateBoardRequestDTO updateBoardRequestDTO) {
-        User authenticatedUser = authenticatedUserService.getCurrentUser();
+    public BoardResponseDTO updateBoard(
+            Long id,
+            UpdateBoardRequestDTO updateBoardRequestDTO) {
 
-        Board board = boardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Quadro não encontrado"));
-
-        if (!board.getOwner().getId().equals(authenticatedUser.getId())) {
-            throw new com.idea_forge.common.exception.InvalidCredentialsException(
-                    "Usuário não autorizado a editar esse quadro");
-        }
+        Board board = getBoardOwnedByAuthenticatedUser(id);
 
         String newName = updateBoardRequestDTO.getName();
 
         if (!board.getName().equalsIgnoreCase(newName)) {
-            boolean nameTaken = boardRepository.existsByOwnerIdAndNameIgnoreCaseAndIdNot(
-                    authenticatedUser.getId(), newName, id);
-            if (nameTaken) {
-                throw new FieldValidationException("name", "Já existe um quadro com esse nome");
-            }
+            validateBoardName(newName, board.getOwner(), id);
         }
 
-        board.setName(updateBoardRequestDTO.getName());
+        board.setName(newName);
         board.setDescription(updateBoardRequestDTO.getDescription());
 
-        Board saved = boardRepository.save(board);
+        Board savedBoard = boardRepository.save(board);
 
-        return boardMapper.toResponse(saved);
+        return boardMapper.toResponse(savedBoard);
+    }
+
+    private User getAuthenticatedUser() {
+        return authenticatedUserService.getCurrentUser();
+    }
+
+    private Board getBoardOwnedByAuthenticatedUser(Long id) {
+        Long userId = getAuthenticatedUser().getId();
+
+        return boardRepository.findByIdAndOwnerId(id, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Quadro não encontrado"));
+    }
+
+    private void validateBoardName(String name, User owner) {
+        boolean nameTaken = boardRepository
+                .existsByOwnerIdAndNameIgnoreCase(owner.getId(), name);
+
+        if (nameTaken) {
+            throwBoardNameAlreadyExists();
+        }
+    }
+
+    private void validateBoardName(String name, User owner, Long boardId) {
+        boolean nameTaken = boardRepository
+                .existsByOwnerIdAndNameIgnoreCaseAndIdNot(
+                        owner.getId(), name, boardId);
+
+        if (nameTaken) {
+            throwBoardNameAlreadyExists();
+        }
+    }
+
+    private void throwBoardNameAlreadyExists() {
+        throw new FieldValidationException(
+                "name",
+                "Já existe um quadro com esse nome");
     }
 }
