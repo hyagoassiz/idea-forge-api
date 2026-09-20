@@ -25,7 +25,7 @@ public class BoardController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BoardResponseDTO createBoard(@Valid @RequestBody CreateBoardRequestDTO request) {
-        return boardService.createBoard(request);
+    public BoardResponseDTO createBoard(@Valid @RequestBody CreateBoardRequestDTO createBoardRequestDTO) {
+        return boardService.createBoard(createBoardRequestDTO);
     }
 }

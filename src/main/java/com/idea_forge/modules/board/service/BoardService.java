@@ -11,60 +11,46 @@ import com.idea_forge.modules.board.entity.Board;
 import com.idea_forge.modules.board.mapper.BoardMapper;
 import com.idea_forge.modules.board.repository.BoardRepository;
 import com.idea_forge.modules.user.entity.User;
-import com.idea_forge.modules.user.repository.UserRepository;
 
 @Service
 public class BoardService {
 
     private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
+
     private final AuthenticatedUserService authenticatedUserService;
+
     private final BoardMapper boardMapper;
 
     public BoardService(
             BoardRepository boardRepository,
-            UserRepository userRepository,
             AuthenticatedUserService authenticatedUserService,
             BoardMapper boardMapper) {
         this.boardRepository = boardRepository;
-        this.userRepository = userRepository;
         this.authenticatedUserService = authenticatedUserService;
         this.boardMapper = boardMapper;
     }
 
     @Transactional
-    public BoardResponseDTO createBoard(CreateBoardRequestDTO request) {
+    public BoardResponseDTO createBoard(CreateBoardRequestDTO createBoardRequestDTO) {
+
         User authenticatedUser = authenticatedUserService.getCurrentUser();
 
-        String normalizedName = normalize(request.getName());
-        String normalizedDescription = normalize(request.getDescription());
+        boolean boardAlreadyExists = boardRepository
+                .existsByOwnerIdAndNameIgnoreCase(
+                        authenticatedUser.getId(),
+                        createBoardRequestDTO.getName());
 
-        if (boardRepository.existsByOwnerAndNameIgnoreCase(
-                authenticatedUser,
-                normalizedName)) {
+        if (boardAlreadyExists) {
             throw new FieldValidationException(
                     "name",
                     "Já existe um quadro com esse nome");
         }
 
-        Board board = boardMapper.toEntity(request);
-
-        board.setName(normalizedName);
-        board.setDescription(normalizedDescription);
+        Board board = boardMapper.toEntity(createBoardRequestDTO);
         board.setOwner(authenticatedUser);
 
         Board savedBoard = boardRepository.save(board);
 
-        authenticatedUser.setActiveBoard(savedBoard);
-        userRepository.save(authenticatedUser);
-
-        BoardResponseDTO response = boardMapper.toResponse(savedBoard);
-        response.setActive(true);
-
-        return response;
-    }
-
-    private String normalize(String value) {
-        return value == null ? null : value.trim();
+        return boardMapper.toResponse(savedBoard);
     }
 }

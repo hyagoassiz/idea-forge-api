@@ -16,7 +16,5 @@ public interface BoardMapper {
     @Mapping(target = "owner", ignore = true)
     Board toEntity(CreateBoardRequestDTO createBoardRequestDTO);
 
-    @Mapping(target = "ownerId", source = "owner.id")
-    @Mapping(target = "active", expression = "java(Boolean.TRUE)")
     BoardResponseDTO toResponse(Board board);
 }
