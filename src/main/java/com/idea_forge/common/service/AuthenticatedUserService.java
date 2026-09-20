@@ -4,6 +4,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.idea_forge.common.exception.InvalidCredentialsException;
 import com.idea_forge.modules.user.entity.User;
 import com.idea_forge.modules.user.repository.UserRepository;
 
@@ -22,11 +23,11 @@ public class AuthenticatedUserService {
         if (authentication == null || !authentication.isAuthenticated()
                 || authentication.getPrincipal() == null
                 || "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new IllegalArgumentException("Credenciais inválidas");
+            throw new InvalidCredentialsException("Credenciais inválidas");
         }
 
         String email = authentication.getName();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+                .orElseThrow(() -> new InvalidCredentialsException("Usuário não encontrado"));
     }
 }

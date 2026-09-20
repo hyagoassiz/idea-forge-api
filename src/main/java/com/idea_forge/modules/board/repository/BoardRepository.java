@@ -10,4 +10,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 
     boolean existsByOwnerIdAndNameIgnoreCase(Long ownerId, String name);
 
+    boolean existsByOwnerIdAndNameIgnoreCaseAndIdNot(Long ownerId, String name, Long id);
+
 }
