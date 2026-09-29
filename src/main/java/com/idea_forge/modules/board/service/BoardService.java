@@ -90,7 +90,7 @@ public class BoardService {
         return authenticatedUserService.getCurrentUser();
     }
 
-    private Board getBoardOwnedByAuthenticatedUser(Long id) {
+    public Board getBoardOwnedByAuthenticatedUser(Long id) {
         Long userId = getAuthenticatedUser().getId();
 
         return boardRepository.findByIdAndOwnerId(id, userId)
