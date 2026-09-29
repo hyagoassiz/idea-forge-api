@@ -1,5 +1,7 @@
 package com.idea_forge.modules.idea.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +58,17 @@ public class IdeaService {
         Idea savedIdea = ideaRepository.save(idea);
 
         return ideaMapper.toResponse(savedIdea);
+    }
+
+    @Transactional(readOnly = true)
+    public List<IdeaResponseDTO> getAllIdeas(Long boardId) {
+        Long userId = getAuthenticatedUser().getId();
+
+        return ideaRepository
+                .findAllByOwnerIdAndBoardId(userId, boardId)
+                .stream()
+                .map(ideaMapper::toResponse)
+                .toList();
     }
 
     private User getAuthenticatedUser() {
