@@ -86,6 +86,26 @@ public class BoardService {
         return boardMapper.toResponse(savedBoard);
     }
 
+    @Transactional
+    public BoardResponseDTO archive(Long id) {
+        return updateArchiveStatus(id, true);
+    }
+
+    @Transactional
+    public BoardResponseDTO unarchive(Long id) {
+        return updateArchiveStatus(id, false);
+    }
+
+    private BoardResponseDTO updateArchiveStatus(Long id, boolean archived) {
+        Board board = getBoardOwnedByAuthenticatedUser(id);
+
+        board.setArchived(archived);
+
+        Board savedBoard = boardRepository.save(board);
+
+        return boardMapper.toResponse(savedBoard);
+    }
+
     private User getAuthenticatedUser() {
         return authenticatedUserService.getCurrentUser();
     }
