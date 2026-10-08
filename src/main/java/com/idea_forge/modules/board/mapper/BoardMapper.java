@@ -1,5 +1,7 @@
 package com.idea_forge.modules.board.mapper;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -17,4 +19,7 @@ public interface BoardMapper {
     Board toEntity(CreateBoardRequestDTO createBoardRequestDTO);
 
     BoardResponseDTO toResponse(Board board);
+
+    List<BoardResponseDTO> toResponseList(List<Board> boards);
+
 }

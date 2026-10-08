@@ -45,6 +45,8 @@ public class IdeaService {
 
         Board board = boardService.getBoardOwnedByAuthenticatedUser(boardId);
 
+        validateBoardIsNotArchived(board);
+
         validateIdeaName(
                 createIdeaRequestDTO.getName(),
                 authenticatedUser);
@@ -73,6 +75,14 @@ public class IdeaService {
 
     private User getAuthenticatedUser() {
         return authenticatedUserService.getCurrentUser();
+    }
+
+    private void validateBoardIsNotArchived(Board board) {
+        if (board.isArchived()) {
+            throw new FieldValidationException(
+                    "boardId",
+                    "Não é possível criar uma ideia em um quadro arquivado");
+        }
     }
 
     private void validateIdeaName(String name, User owner) {
