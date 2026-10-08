@@ -2,7 +2,6 @@ package com.idea_forge.modules.board.service;
 
 import java.util.List;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +11,7 @@ import com.idea_forge.modules.board.dto.BoardResponseDTO;
 import com.idea_forge.modules.board.dto.CreateBoardRequestDTO;
 import com.idea_forge.modules.board.dto.UpdateBoardRequestDTO;
 import com.idea_forge.modules.board.entity.Board;
+import com.idea_forge.modules.board.filter.BoardFilter;
 import com.idea_forge.modules.board.mapper.BoardMapper;
 import com.idea_forge.modules.board.repository.BoardRepository;
 import com.idea_forge.modules.user.entity.User;
@@ -48,14 +48,15 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public List<BoardResponseDTO> getAllBoards() {
+    public List<BoardResponseDTO> getAllBoards(BoardFilter boardFilter) {
         Long userId = getAuthenticatedUser().getId();
 
-        return boardRepository
-                .findAllByOwnerId(userId, Sort.by(Sort.Direction.ASC, "name"))
-                .stream()
-                .map(boardMapper::toResponse)
-                .toList();
+        List<Board> boards = boardRepository.findAllByOwnerId(
+                userId,
+                boardFilter.getArchived(),
+                boardFilter.getSearch());
+
+        return boardMapper.toResponseList(boards);
     }
 
     @Transactional(readOnly = true)
@@ -80,6 +81,26 @@ public class BoardService {
 
         board.setName(newName);
         board.setDescription(updateBoardRequestDTO.getDescription());
+
+        Board savedBoard = boardRepository.save(board);
+
+        return boardMapper.toResponse(savedBoard);
+    }
+
+    @Transactional
+    public BoardResponseDTO archive(Long id) {
+        return updateArchiveStatus(id, true);
+    }
+
+    @Transactional
+    public BoardResponseDTO unarchive(Long id) {
+        return updateArchiveStatus(id, false);
+    }
+
+    private BoardResponseDTO updateArchiveStatus(Long id, boolean archived) {
+        Board board = getBoardOwnedByAuthenticatedUser(id);
+
+        board.setArchived(archived);
 
         Board savedBoard = boardRepository.save(board);
 
