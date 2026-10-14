@@ -53,11 +53,7 @@ public class UserService {
         EmailVerificationToken emailVerificationToken = emailVerificationService.createVerificationToken(savedUser);
         emailVerificationService.sendVerificationEmail(savedUser, emailVerificationToken.getToken());
 
-        // TODO: Remove this temporary token exposure once the email verification flow
-        // is final.
-        CreateUserResponseDTO response = userMapper.toCreateResponse(savedUser);
-        response.setToken(emailVerificationToken.getToken());
-        return response;
+        return userMapper.toCreateResponse(savedUser);
     }
 
     public UserResponseDTO getAuthenticatedUser() {

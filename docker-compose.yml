@@ -8,6 +8,14 @@ services:
       POSTGRES_DB: idea_forge
     ports:
       - "5432:5432"
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: idea-forge-mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
   api:
     build:
       context: .
@@ -15,6 +23,7 @@ services:
     container_name: idea-forge-api
     depends_on:
       - postgres
+      - mailpit
     ports:
       - "8080:8080"
     environment:
@@ -22,3 +31,12 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: "false"
+      APP_MAIL_FROM: no-reply@idea-forge.local
+      APP_FRONTEND_URL: http://localhost:3000
+      APP_FRONTEND_VERIFY_EMAIL_PATH: /verify-email
+      APP_FRONTEND_RESET_PASSWORD_PATH: /reset-password
