@@ -9,5 +9,4 @@ public class CreateUserResponseDTO {
     private String name;
     private String email;
     private Boolean emailVerified;
-    private String token;
 }
