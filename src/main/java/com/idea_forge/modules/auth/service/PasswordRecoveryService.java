@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.idea_forge.common.exception.EmailSendFailedException;
 import com.idea_forge.common.exception.InvalidPasswordResetTokenException;
 import com.idea_forge.modules.auth.dto.ForgotPasswordResponseDTO;
 import com.idea_forge.modules.auth.dto.ResetPasswordRequestDTO;
@@ -29,13 +30,17 @@ public class PasswordRecoveryService {
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthEmailSender authEmailSender;
 
-    public PasswordRecoveryService(UserRepository userRepository,
+    public PasswordRecoveryService(
+            UserRepository userRepository,
             PasswordResetTokenRepository passwordResetTokenRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            AuthEmailSender authEmailSender) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authEmailSender = authEmailSender;
     }
 
     @Transactional
@@ -59,7 +64,12 @@ public class PasswordRecoveryService {
         token.setUsedAt(null);
         passwordResetTokenRepository.save(token);
 
-        return new ForgotPasswordResponseDTO(FORGOT_PASSWORD_MESSAGE, tokenValue);
+        try {
+            authEmailSender.sendPasswordResetEmail(user, tokenValue);
+        } catch (EmailSendFailedException ignored) {
+        }
+
+        return new ForgotPasswordResponseDTO(FORGOT_PASSWORD_MESSAGE);
     }
 
     public ValidateResetTokenResponseDTO validateToken(String token) {
@@ -100,5 +110,4 @@ public class PasswordRecoveryService {
 
         return passwordResetTokenRepository.findByTokenAndUsedAtIsNullAndExpiresAtAfter(token, LocalDateTime.now());
     }
-
 }

@@ -9,9 +9,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EmailVerificationResponseDTO {
     private String message;
-    private String token;
-
-    public EmailVerificationResponseDTO(String message) {
-        this.message = message;
-    }
 }

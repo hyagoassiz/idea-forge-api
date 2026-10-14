@@ -1,12 +1,14 @@
 package com.idea_forge.modules.auth.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.idea_forge.common.exception.EmailAlreadyVerifiedException;
+import com.idea_forge.common.exception.EmailSendFailedException;
 import com.idea_forge.common.exception.EmailVerificationSendFailedException;
 import com.idea_forge.common.exception.ExpiredVerificationTokenException;
 import com.idea_forge.common.exception.InvalidVerificationTokenException;
@@ -25,17 +27,16 @@ public class EmailVerificationService {
     private static final int RESEND_COOLDOWN_MINUTES = 5;
 
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
-
     private final UserRepository userRepository;
+    private final AuthEmailSender authEmailSender;
 
-    private final EmailVerificationEmailSender emailVerificationEmailSender;
-
-    public EmailVerificationService(EmailVerificationTokenRepository emailVerificationTokenRepository,
+    public EmailVerificationService(
+            EmailVerificationTokenRepository emailVerificationTokenRepository,
             UserRepository userRepository,
-            EmailVerificationEmailSender emailVerificationEmailSender) {
+            AuthEmailSender authEmailSender) {
         this.emailVerificationTokenRepository = emailVerificationTokenRepository;
         this.userRepository = userRepository;
-        this.emailVerificationEmailSender = emailVerificationEmailSender;
+        this.authEmailSender = authEmailSender;
     }
 
     @Transactional
@@ -52,7 +53,11 @@ public class EmailVerificationService {
     }
 
     public void sendVerificationEmail(User user, String token) {
-        emailVerificationEmailSender.sendVerificationEmail(user, token);
+        try {
+            authEmailSender.sendVerificationEmail(user, token);
+        } catch (EmailSendFailedException ex) {
+            throw new EmailVerificationSendFailedException("Não foi possível enviar o e-mail de validação.", ex);
+        }
     }
 
     @Transactional
@@ -66,8 +71,7 @@ public class EmailVerificationService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Check existing token for this user
-        java.util.Optional<EmailVerificationToken> existingTokenOpt = emailVerificationTokenRepository.findByUser(user);
+        Optional<EmailVerificationToken> existingTokenOpt = emailVerificationTokenRepository.findByUser(user);
         if (existingTokenOpt.isPresent()) {
             EmailVerificationToken existing = existingTokenOpt.get();
             if (existing.getCreatedAt() != null
@@ -81,16 +85,9 @@ public class EmailVerificationService {
         }
 
         EmailVerificationToken newToken = createVerificationToken(user);
+        sendVerificationEmail(user, newToken.getToken());
 
-        try {
-            sendVerificationEmail(user, newToken.getToken());
-        } catch (RuntimeException ex) {
-            throw new EmailVerificationSendFailedException("Não foi possível enviar o e-mail de validação.");
-        }
-
-        // TODO: Remove this temporary token exposure once the email verification flow
-        // is final.
-        return new EmailVerificationResponseDTO("novo e-mail de validação enviado com sucesso.", newToken.getToken());
+        return new EmailVerificationResponseDTO("Novo e-mail de validação enviado com sucesso.");
     }
 
     @Transactional
