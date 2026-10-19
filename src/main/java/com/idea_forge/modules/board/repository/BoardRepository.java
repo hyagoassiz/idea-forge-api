@@ -12,26 +12,26 @@ import com.idea_forge.modules.board.entity.Board;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
-        @Query("""
-                        SELECT b
-                        FROM Board b
-                        WHERE b.owner.id = :ownerId
-                          AND (:archived IS NULL OR b.archived = :archived)
-                          AND (
-                              LOWER(b.name) LIKE LOWER(CONCAT('%', COALESCE(:search, ''), '%'))
-                              OR LOWER(b.description) LIKE LOWER(CONCAT('%', COALESCE(:search, ''), '%'))
-                          )
-                        ORDER BY LOWER(b.name) ASC
-                        """)
-        List<Board> findAllByOwnerId(
-                        Long ownerId,
-                        Boolean archived,
-                        String search);
+  @Query("""
+      SELECT b
+      FROM Board b
+      WHERE b.owner.id = :ownerId
+        AND (:archived IS NULL OR b.archived = :archived)
+        AND (
+            LOWER(b.name) LIKE LOWER(CONCAT('%', COALESCE(:search, ''), '%'))
+            OR LOWER(b.description) LIKE LOWER(CONCAT('%', COALESCE(:search, ''), '%'))
+        )
+      ORDER BY LOWER(b.name) ASC
+      """)
+  List<Board> findAllByOwnerId(
+      Long ownerId,
+      Boolean archived,
+      String search);
 
-        Optional<Board> findByIdAndOwnerId(Long id, Long ownerId);
+  Optional<Board> findByIdAndOwnerId(Long id, Long ownerId);
 
-        boolean existsByOwnerIdAndNameIgnoreCase(Long ownerId, String name);
+  boolean existsByOwnerIdAndNameIgnoreCase(Long ownerId, String name);
 
-        boolean existsByOwnerIdAndNameIgnoreCaseAndIdNot(Long ownerId, String name, Long id);
+  boolean existsByOwnerIdAndNameIgnoreCaseAndIdNot(Long ownerId, String name, Long id);
 
 }
