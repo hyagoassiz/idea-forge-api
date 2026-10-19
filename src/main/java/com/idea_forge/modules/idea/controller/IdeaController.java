@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.idea_forge.modules.idea.dto.CreateIdeaRequestDTO;
 import com.idea_forge.modules.idea.dto.IdeaResponseDTO;
+import com.idea_forge.modules.idea.dto.UpdateIdeaStatusRequestDTO;
 import com.idea_forge.modules.idea.service.IdeaService;
 
 import jakarta.validation.Valid;
@@ -38,6 +40,18 @@ public class IdeaController {
     @GetMapping
     public List<IdeaResponseDTO> getAllIdeas(@PathVariable Long boardId) {
         return ideaService.getAllIdeas(boardId);
+    }
+
+    @PatchMapping("/{ideaId}/status")
+    public IdeaResponseDTO updateStatus(
+            @PathVariable Long boardId,
+            @PathVariable Long ideaId,
+            @Valid @RequestBody UpdateIdeaStatusRequestDTO updateIdeaStatusRequestDTO) {
+
+        return ideaService.updateStatus(
+                boardId,
+                ideaId,
+                updateIdeaStatusRequestDTO);
     }
 
 }
