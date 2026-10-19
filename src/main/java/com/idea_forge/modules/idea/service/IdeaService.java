@@ -11,6 +11,7 @@ import com.idea_forge.modules.board.entity.Board;
 import com.idea_forge.modules.board.service.BoardService;
 import com.idea_forge.modules.idea.dto.CreateIdeaRequestDTO;
 import com.idea_forge.modules.idea.dto.IdeaResponseDTO;
+import com.idea_forge.modules.idea.dto.UpdateIdeaStatusRequestDTO;
 import com.idea_forge.modules.idea.entity.Idea;
 import com.idea_forge.modules.idea.enums.IdeaStatus;
 import com.idea_forge.modules.idea.mapper.IdeaMapper;
@@ -73,6 +74,29 @@ public class IdeaService {
                 .toList();
     }
 
+    @Transactional
+    public IdeaResponseDTO updateStatus(Long boardId, Long ideaId,
+            UpdateIdeaStatusRequestDTO updateIdeaStatusRequestDTO) {
+        Board board = boardService.getBoardOwnedByAuthenticatedUser(boardId);
+
+        validateBoardIsNotArchived(board);
+
+        Idea idea = getIdeaOwnedByAuthenticatedUser(ideaId);
+
+        idea.setStatus(updateIdeaStatusRequestDTO.getStatus());
+
+        Idea savedIdea = ideaRepository.save(idea);
+
+        return ideaMapper.toResponse(savedIdea);
+    }
+
+    public Idea getIdeaOwnedByAuthenticatedUser(Long ideaId) {
+        Long userId = getAuthenticatedUser().getId();
+
+        return ideaRepository.findByIdAndOwnerId(ideaId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Ideia não encontrada"));
+    }
+
     private User getAuthenticatedUser() {
         return authenticatedUserService.getCurrentUser();
     }
@@ -81,7 +105,7 @@ public class IdeaService {
         if (board.isArchived()) {
             throw new FieldValidationException(
                     "boardId",
-                    "Não é possível criar uma ideia em um quadro arquivado");
+                    "Não é possível realizar esta operação em um quadro arquivado");
         }
     }
 
