@@ -12,5 +12,6 @@ public class IdeaResponseDTO {
     private String name;
     private String description;
     private IdeaStatus status;
+    private boolean archived;
 
 }
