@@ -59,18 +59,18 @@ public class IdeaController {
         return ideaService.getIdeaById(ideaId);
     }
 
-    @PutMapping("/ideas/{id}")
+    @PutMapping("/ideas/{ideaId}")
     public IdeaResponseDTO updateIdea(@PathVariable Long ideaId,
             @Valid @RequestBody UpdateIdeaRequestDTO updateIdeaRequestDTO) {
         return ideaService.updateIdea(ideaId, updateIdeaRequestDTO);
     }
 
-    @PatchMapping("/ideas/{id}/archive")
+    @PatchMapping("/ideas/{ideaId}/archive")
     public IdeaResponseDTO archive(@PathVariable Long ideaId) {
         return ideaService.archive(ideaId);
     }
 
-    @PatchMapping("/ideas/{id}/unarchive")
+    @PatchMapping("/ideas/{ideaId}/unarchive")
     public IdeaResponseDTO unarchive(@PathVariable Long ideaId) {
         return ideaService.unarchive(ideaId);
     }
