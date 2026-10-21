@@ -11,6 +11,7 @@ import com.idea_forge.modules.board.entity.Board;
 import com.idea_forge.modules.board.service.BoardService;
 import com.idea_forge.modules.idea.dto.CreateIdeaRequestDTO;
 import com.idea_forge.modules.idea.dto.IdeaResponseDTO;
+import com.idea_forge.modules.idea.dto.UpdateIdeaRequestDTO;
 import com.idea_forge.modules.idea.dto.UpdateIdeaStatusRequestDTO;
 import com.idea_forge.modules.idea.entity.Idea;
 import com.idea_forge.modules.idea.enums.IdeaStatus;
@@ -63,6 +64,29 @@ public class IdeaService {
         return ideaMapper.toResponse(savedIdea);
     }
 
+    @Transactional
+    public IdeaResponseDTO updateIdea(
+            Long ideaId,
+            UpdateIdeaRequestDTO updateIdeaRequestDTO) {
+
+        Idea idea = getIdeaOwnedByAuthenticatedUser(ideaId);
+
+        validateBoardIsNotArchived(idea.getBoard());
+
+        String newName = updateIdeaRequestDTO.getName();
+
+        if (!idea.getName().equalsIgnoreCase(newName)) {
+            validateIdeaName(newName, idea.getOwner());
+        }
+
+        idea.setName(newName);
+        idea.setDescription(updateIdeaRequestDTO.getDescription());
+
+        Idea savedIdea = ideaRepository.save(idea);
+
+        return ideaMapper.toResponse(savedIdea);
+    }
+
     @Transactional(readOnly = true)
     public List<IdeaResponseDTO> getAllIdeas(Long boardId) {
         Long userId = getAuthenticatedUser().getId();
@@ -75,19 +99,49 @@ public class IdeaService {
     }
 
     @Transactional
-    public IdeaResponseDTO updateStatus(Long boardId, Long ideaId,
+    public IdeaResponseDTO updateStatus(Long ideaId,
             UpdateIdeaStatusRequestDTO updateIdeaStatusRequestDTO) {
-        Board board = boardService.getBoardOwnedByAuthenticatedUser(boardId);
+        Idea idea = getIdeaOwnedByAuthenticatedUser(ideaId);
+
+        Board board = boardService.getBoardOwnedByAuthenticatedUser(idea.getBoard().getId());
 
         validateBoardIsNotArchived(board);
-
-        Idea idea = getIdeaOwnedByAuthenticatedUser(ideaId);
 
         idea.setStatus(updateIdeaStatusRequestDTO.getStatus());
 
         Idea savedIdea = ideaRepository.save(idea);
 
         return ideaMapper.toResponse(savedIdea);
+    }
+
+    @Transactional
+    public IdeaResponseDTO archive(Long ideaId) {
+        return updateArchiveStatus(ideaId, true);
+    }
+
+    @Transactional
+    public IdeaResponseDTO unarchive(Long ideaId) {
+        return updateArchiveStatus(ideaId, false);
+    }
+
+    private IdeaResponseDTO updateArchiveStatus(Long ideaId, boolean archived) {
+
+        Idea idea = getIdeaOwnedByAuthenticatedUser(ideaId);
+
+        validateBoardIsNotArchived(idea.getBoard());
+
+        idea.setArchived(archived);
+
+        Idea savedIdea = ideaRepository.save(idea);
+
+        return ideaMapper.toResponse(savedIdea);
+    }
+
+    @Transactional(readOnly = true)
+    public IdeaResponseDTO getIdeaById(Long ideaId) {
+        Idea idea = getIdeaOwnedByAuthenticatedUser(ideaId);
+
+        return ideaMapper.toResponse(idea);
     }
 
     public Idea getIdeaOwnedByAuthenticatedUser(Long ideaId) {
