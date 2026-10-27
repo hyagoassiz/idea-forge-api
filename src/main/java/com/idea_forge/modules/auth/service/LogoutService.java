@@ -9,9 +9,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class LogoutService {
 
     private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
-
+    private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
     private static final String LEGACY_ACCESS_TOKEN_COOKIE_NAME = "access_token";
-
+    private static final String LEGACY_REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
     private static final String COOKIE_PATH = "/";
 
     /**
@@ -21,7 +21,9 @@ public class LogoutService {
      */
     public void logout(HttpServletResponse response) {
         addExpiredCookie(response, ACCESS_TOKEN_COOKIE_NAME);
+        addExpiredCookie(response, REFRESH_TOKEN_COOKIE_NAME);
         addExpiredCookie(response, LEGACY_ACCESS_TOKEN_COOKIE_NAME);
+        addExpiredCookie(response, LEGACY_REFRESH_TOKEN_COOKIE_NAME);
     }
 
     private void addExpiredCookie(HttpServletResponse response, String cookieName) {
