@@ -35,6 +35,9 @@ public class Idea extends BaseEntity {
     @Column(nullable = false, length = 20)
     private IdeaStatus status;
 
+    @Column(nullable = false)
+    private boolean archived = false;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
