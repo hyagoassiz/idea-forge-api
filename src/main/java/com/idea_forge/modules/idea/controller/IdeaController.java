@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.idea_forge.modules.idea.dto.CreateIdeaRequestDTO;
+import com.idea_forge.modules.idea.dto.IdeaFilter;
 import com.idea_forge.modules.idea.dto.IdeaResponseDTO;
 import com.idea_forge.modules.idea.dto.UpdateIdeaRequestDTO;
 import com.idea_forge.modules.idea.dto.UpdateIdeaStatusRequestDTO;
@@ -39,8 +40,8 @@ public class IdeaController {
 
     @GetMapping("/boards/{boardId}/ideas")
     public List<IdeaResponseDTO> getAllIdeas(
-            @PathVariable Long boardId) {
-        return ideaService.getAllIdeas(boardId);
+            @PathVariable Long boardId, IdeaFilter ideaFilter) {
+        return ideaService.getAllIdeas(boardId, ideaFilter);
     }
 
     @PatchMapping("/ideas/{ideaId}/status")
