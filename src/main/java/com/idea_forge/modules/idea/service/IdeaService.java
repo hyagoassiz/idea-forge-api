@@ -10,6 +10,7 @@ import com.idea_forge.common.service.AuthenticatedUserService;
 import com.idea_forge.modules.board.entity.Board;
 import com.idea_forge.modules.board.service.BoardService;
 import com.idea_forge.modules.idea.dto.CreateIdeaRequestDTO;
+import com.idea_forge.modules.idea.dto.IdeaFilter;
 import com.idea_forge.modules.idea.dto.IdeaResponseDTO;
 import com.idea_forge.modules.idea.dto.UpdateIdeaRequestDTO;
 import com.idea_forge.modules.idea.dto.UpdateIdeaStatusRequestDTO;
@@ -88,11 +89,11 @@ public class IdeaService {
     }
 
     @Transactional(readOnly = true)
-    public List<IdeaResponseDTO> getAllIdeas(Long boardId) {
+    public List<IdeaResponseDTO> getAllIdeas(Long boardId, IdeaFilter ideaFilter) {
         Long userId = getAuthenticatedUser().getId();
 
         return ideaRepository
-                .findAllByOwnerIdAndBoardId(userId, boardId)
+                .findAllByOwnerIdAndBoardId(userId, boardId, ideaFilter.getArchived(), ideaFilter.getSearch())
                 .stream()
                 .map(ideaMapper::toResponse)
                 .toList();
